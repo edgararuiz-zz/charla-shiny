@@ -1,0 +1,74 @@
+---
+title: "Mi flexdashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(DT)
+library(datos)
+```
+
+Principal
+=======================================================================
+
+Row 
+-----------------------------------------------------------------------
+### Options
+
+```{r}
+selectInput("trans", "Transmision", c("Automatico", "Manual"), selectize = FALSE
+)
+```
+
+### Promedio Millas
+
+```{r}
+renderValueBox(valueBox(round(mean(sel_autos()$millas), 2)))
+```
+
+### Promedio Peso
+
+```{r}
+renderValueBox(valueBox(round(mean(sel_autos()$peso), 2)))
+```
+
+```{r server}
+sel_autos <- reactive(
+  mtautos[mtautos$transmision == ifelse(input$trans == "Manual", 1, 0), ]
+  )
+```
+
+Row {.tabset}
+-----------------------------------------------------------------------
+
+### Detalle - Parte 1
+
+```{r}
+renderDataTable(datatable(sel_autos()[, 1:6]))
+```
+
+### Detalle - Parte 2
+
+```{r}
+renderDataTable(datatable(sel_autos()[, 7:12]))
+```
+
+Modelo {.storyboard}
+=======================================================================
+
+### Los resultados del modelo son estos
+
+```{r}
+summary(lm(peso ~ millas, data = mtautos))
+```
+
+### Estos son las graficas generadas por el modelo
+
+```{r}
+plot(lm(peso ~ millas, data = mtautos))
+```
